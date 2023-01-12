@@ -16,6 +16,7 @@ using Avalonia.Threading;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using System.Reactive.Disposables;
+using SkiaSharp;
 
 namespace AddCoverToVideoFile.ViewModels
 {
@@ -126,9 +127,10 @@ namespace AddCoverToVideoFile.ViewModels
             DefaultDropImageForPicture = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
             DefaultDropImageForVideo = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
 
-            ApplyAndSaveCommand = ReactiveCommand.Create(async () =>
+            ApplyAndSaveCommand = ReactiveCommand.Create( () =>
             {
-                await OnSave();
+                //await OnSave();
+                Task.Run(() => OnSave());
             });
         }
 
