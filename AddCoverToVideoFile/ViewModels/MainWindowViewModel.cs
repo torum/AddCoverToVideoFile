@@ -172,6 +172,7 @@ namespace AddCoverToVideoFile.ViewModels
                         PictureFilePath = filePath;
                         PictureFileName = System.IO.Path.GetFileName(filePath);
                         DefaultTextForPicture = "";
+                        DefaultDropImageForPicture = null;
                         await LoadCover(filePath);
                     }
                     else
