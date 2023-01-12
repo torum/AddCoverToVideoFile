@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AddCoverToVideoFile.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="536"
+        x:Class="AddCoverToVideoFile.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+		Width="888" MinWidth="888"
+		Height="470" MinHeight="470"
+		DragDrop.AllowDrop="True"
+		WindowStartupLocation="CenterScreen"
+        Title="{Binding Greeting}"
+		TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+		ExtendClientAreaToDecorationsHint="False"
+		ExtendClientAreaChromeHints="PreferSystemChrome"
+		HasSystemDecorations ="True">
+	<Window.Styles>
+		<Style Selector="TextBox">
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+		</Style>
+	</Window.Styles>
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+	
+	<Panel>
+		<ExperimentalAcrylicBorder IsHitTestVisible="False">
+			<ExperimentalAcrylicBorder.Material>
+				<ExperimentalAcrylicMaterial
+					BackgroundSource="Digger"
+					TintColor="Black"
+					TintOpacity="1"
+					MaterialOpacity="0.65" />
+			</ExperimentalAcrylicBorder.Material>
+		</ExperimentalAcrylicBorder>
+
+		<Grid RowDefinitions="360,74,30" Margin="12,0,12,0">
+
+			<Grid Grid.Row="0" RowDefinitions="Auto,Auto" ColumnDefinitions="1*,48,1*" Margin="4,48,4,4">
+
+
+				<Image Grid.Row="0" Grid.Column="0" Width="400" Height="268" Source="{Binding DefaultDropImageForPicture}"></Image>
+
+				<TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding DefaultTextForPicture}" Margin="0,36,0,0"
+						   HorizontalAlignment="Center" VerticalAlignment="Top"/>
+				<Border Grid.Row="0" Grid.Column="0" Background="Transparent" Margin="4" CornerRadius="0">
+					<Image Width="400" Height="268" Source="{Binding NewAlbumArt}"></Image>
+				</Border>
+				<Image Grid.Row="0" Grid.Column="1" Width="48" Height="48" Source="avares://AddCoverToVideoFile/Assets/arrow-gray.png"/>
+
+				<Image Grid.Row="0" Grid.Column="2" Width="400" Height="268" Source="{Binding DefaultDropImageForVideo}"></Image>
+				<TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding DefaultTextForVideo}" Margin="0,36,0,0"
+						   HorizontalAlignment="Center" VerticalAlignment="Top"/>
+				<Border Grid.Row="0" Grid.Column="2" Background="Transparent" Margin="4" CornerRadius="0">
+					<Image Width="400" Height="268" Source="{Binding AlbumArt}"></Image>
+				</Border>
+
+				<TextBlock Grid.Row="1" Grid.Column="0" IsEnabled="False" Text="{Binding PictureFileName}" Background="Transparent"
+						   HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="12,0,12,0" TextTrimming="CharacterEllipsis"/>
+				<TextBlock Grid.Row="1" Grid.Column="2" IsEnabled="False" Text="{Binding VideoFileName}" Background="Transparent"
+						   HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="12,0,12,0" TextTrimming="CharacterEllipsis"/>
+			</Grid>
+
+			<Border Grid.Row="1" BorderThickness="0 0 0 0" BorderBrush="#555">
+				<Button Command="{Binding ApplyAndSaveCommand}" IsEnabled="{Binding IsButtonEnabled}" Content="Apply and Save" HorizontalAlignment="Right" Padding="24,12,24,12" Margin="48,12,24,12"></Button>
+			</Border>
+
+			<Border Grid.Row="2" Background="Transparent" BorderThickness="0 0.5 0 0" BorderBrush="#555" VerticalAlignment="Stretch">
+				<Grid RowDefinitions="*" ColumnDefinitions="Auto,*">
+					<Border Grid.Column="0" VerticalAlignment="Center">
+						<TextBlock Text="{Binding StatusBarMessage}" Foreground="#cccccc" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="6 0 6 0" Padding="3" TextWrapping="NoWrap"></TextBlock>
+					</Border>
+					<Border Grid.Column="1" VerticalAlignment="Center">
+						<TextBlock Text="{Binding StatusBarErrorMessage}" Foreground="Red" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="6 0 6 0" Padding="3" TextWrapping="NoWrap"></TextBlock>
+					</Border>
+				</Grid>
+			</Border>
+		</Grid>
+	</Panel>
+</Window>

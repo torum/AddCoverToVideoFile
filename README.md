@@ -1,1 +1,1 @@
-# AddCoverToMP4
+# AddCoverToVideoFile
