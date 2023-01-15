@@ -8,6 +8,8 @@ using Avalonia.ReactiveUI;
 using System.Reactive.Disposables;
 using ReactiveUI;
 using System.Reactive.Linq;
+using Avalonia.Interactivity;
+using System.Collections.Generic;
 
 namespace AddCoverToVideoFile.Views
 {
@@ -33,7 +35,38 @@ namespace AddCoverToVideoFile.Views
                 (DataContext as MainWindowViewModel).OnFileDrop(e.Data.GetFileNames());
             }
         }
+
+        private async void OnFileOpenButtonClicked(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select movie file and picture",
+                AllowMultiple = true
+            };
+
+            List<FileDialogFilter> Filters = new List<FileDialogFilter>();
+            FileDialogFilter filter = new FileDialogFilter();
+
+            List<string> extension = new List<string>();
+            extension.Add("mp4");
+            extension.Add("mkv");
+            extension.Add("avi");
+            extension.Add("jpg");
+            extension.Add("jpeg");
+            extension.Add("png");
+
+            filter.Extensions = extension;
+
+            openFileDialog.Filters.Add(filter);
+            var result = await openFileDialog.ShowAsync(this);
+
+            if (result != null)
+            {
+                (DataContext as MainWindowViewModel).OnFileDrop(result);
+            }
+        }
     }
+
 
     public abstract class BaseWindow<T> : ReactiveWindow<T> where T : ViewModelBase
     {

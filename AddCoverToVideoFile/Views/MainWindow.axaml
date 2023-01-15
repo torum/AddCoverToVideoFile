@@ -65,7 +65,13 @@
 			</Grid>
 
 			<Border Grid.Row="1" BorderThickness="0 0 0 0" BorderBrush="#555">
-				<Button Command="{Binding ApplyAndSaveCommand}" IsEnabled="{Binding IsButtonEnabled}" Content="Apply and Save" HorizontalAlignment="Right" Padding="24,12,24,12" Margin="48,12,24,12"></Button>
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+					
+					<Button x:Name="FileOpenButton" Click="OnFileOpenButtonClicked" Content="Open Files" HorizontalAlignment="Right" Padding="24,12,24,12" Margin="48,12,24,12"></Button>
+
+					<Button Command="{Binding ApplyAndSaveCommand}" IsEnabled="{Binding IsButtonEnabled}" Content="Apply and Save" HorizontalAlignment="Right" Padding="24,12,24,12" Margin="48,12,24,12"></Button>
+
+				</StackPanel>
 			</Border>
 
 			<Border Grid.Row="2" Background="Transparent" BorderThickness="0 0.5 0 0" BorderBrush="#555" VerticalAlignment="Stretch">

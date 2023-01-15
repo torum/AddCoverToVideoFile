@@ -22,7 +22,7 @@ namespace AddCoverToVideoFile.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "AddCoverToVideoFile v1.0.0.2";
+        public string Greeting => "AddCoverToVideoFile v1.0.0.3";
 
         private string statusBarMessage;
 
@@ -184,7 +184,7 @@ namespace AddCoverToVideoFile.ViewModels
                             DefaultDropImageForVideo = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/video2.png")));
                         }
                     }
-                    else if ((fileExt.ToLower() == ".jpg") || (fileExt.ToLower() == ".png"))
+                    else if ((fileExt.ToLower() == ".jpg") || (fileExt.ToLower() == ".jpeg") || (fileExt.ToLower() == ".png"))
                     {
                         PictureFilePath = filePath;
                         PictureFileName = System.IO.Path.GetFileName(filePath);
