@@ -22,7 +22,7 @@ namespace AddCoverToVideoFile.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "AddCoverToVideoFile v1.0.0.1";
+        public string Greeting => "AddCoverToVideoFile v1.0.0.2";
 
         private string statusBarMessage;
 
@@ -159,10 +159,25 @@ namespace AddCoverToVideoFile.ViewModels
 
                         if (file.Tag.Pictures.Length > 0)
                         {
+                            // for Avalonia UI
                             using (var stream = new MemoryStream(file.Tag.Pictures[0].Data.Data))
                             {
                                 AlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(stream, 400));
                             }
+
+                            /* for WPF
+                            using (var stream = new MemoryStream(file.Tag.Pictures[0].Data.Data))
+                            {
+                                var bitmap = new BitmapImage();
+                                bitmap.BeginInit();
+                                bitmap.StreamSource = stream;
+                                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                                bitmap.EndInit();
+                                bitmap.Freeze();
+
+                                AlbumArt = bitmap;
+                            }
+                            */
                         }
                         else
                         {
@@ -175,7 +190,15 @@ namespace AddCoverToVideoFile.ViewModels
                         PictureFileName = System.IO.Path.GetFileName(filePath);
                         DefaultTextForPicture = "";
                         DefaultDropImageForPicture = null;
+
                         await LoadCover(filePath);
+
+                        // for WPF
+                        /*
+                        ImageLoader imgLoader = new ImageLoader();
+                        imgLoader.BmpImg = imgLoader.GetBitmapImage(PictureFilePath);
+                        NewAlbumArt = imgLoader.BmpImg;
+                        */
                     }
                     else
                     {
@@ -196,12 +219,9 @@ namespace AddCoverToVideoFile.ViewModels
                 {
                     StatusBarMessage = "Drop a video.";
                 }
-
-                //Application.Current.Dispatcher.Invoke(() => CommandManager.InvalidateRequerySuggested());
             }
         }
-
-        // TODO save as .tmp then replace it.
+        
         private async Task<bool> OnSave()
         {
             // https://github.com/mono/taglib-sharp/blob/master/examples/SetPictures/SetPictures.cs
@@ -216,25 +236,21 @@ namespace AddCoverToVideoFile.ViewModels
                 {
                     TagLib.File file = TagLib.File.Create(VideoFilePath);
 
-                    //var custom = (TagLib.IFD.IFDTag)file.GetTag(TagLib.TagTypes.Xiph);
-                    //var tag = file.Tag as .;
-
-
                     /*
                     string title = file.Tag.Title;
                     TimeSpan duration = file.Properties.Duration;
-                    Debug.WriteLine("Title: {0}, duration: {1}", title, duration);
                     file.Tag.Title = "my new title";
                     */
+
                     /*
                     file.Tag.Pictures = new TagLib.IPicture[] { new TagLib.Picture(@"C:\Users\torum\Desktop\test.jpg") };
-
                     file.Save();
-
                     */
+
                     TagLib.Picture picture = new TagLib.Picture(PictureFilePath);
                     //picture.MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg;
                     //picture.Type = TagLib.PictureType.FrontCover;
+                    
                     /*
                     TagLib.Id3v2.AttachmentFrame cover = new TagLib.Id3v2.AttachmentFrame
                     {
@@ -243,25 +259,37 @@ namespace AddCoverToVideoFile.ViewModels
                         MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg,
                         //Data = imageBytes,
                         TextEncoding = TagLib.StringType.UTF16
-
-
                     };
                     */
-                    file.Tag.Pictures = new TagLib.IPicture[] { picture };
+
+                    //file.Tag.Pictures = new TagLib.IPicture[] { picture };
+                    
+                    // Preserving other pictures
+                    if (file.Tag.Pictures.Count() > 0)
+                    {
+                        file.Tag.Pictures[0] = picture;
+                    }
+                    else
+                    {
+                        file.Tag.Pictures = new TagLib.IPicture[] { picture };
+                    }
 
                     try
                     {
-                        var tmpFile = Path.ChangeExtension(VideoFilePath, ".bak");
-                        System.IO.File.Copy(VideoFilePath, tmpFile);
+                        // TODO: save as .tmp then replace it.
+                        //var tmpFile = Path.ChangeExtension(VideoFilePath, ".bak");
+                        //System.IO.File.Copy(VideoFilePath, tmpFile);
 
                         file.Save();
 
                         await Task.Delay(30);
 
-                        System.IO.File.Delete(tmpFile);
+                        // TODO: delete tmp file.
+                        //System.IO.File.Delete(tmpFile);
 
-                        Dispatcher.UIThread.Post(async () => 
+                        Dispatcher.UIThread.Post(async () =>
                         {
+                            // Load pic for visula confirmation.
                             using (var stream = new MemoryStream(file.Tag.Pictures[0].Data.Data))
                             {
                                 AlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(stream, 400));
