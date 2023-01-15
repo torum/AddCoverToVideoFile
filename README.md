@@ -1,7 +1,9 @@
 # AddCoverToVideoFile
-A ~~cross-platform~~ desktop GUI app to easily add cover art/thumbnail to MP4, MKV, and AVI files.  
+A cross-platform desktop GUI app to easily add cover art/thumbnail to MP4, MKV, and AVI files.  
 
-This app is developed as an [Avalonia UI](https://avaloniaui.net/) app and uses [Taglib#](https://github.com/mono/taglib-sharp) for metadata tag editing, so it should runs on Windows, ~~Linux~~, and Mac as well. It turnes out [Avalonia UI currently does not support file drag and drop on Linux](https://github.com/AvaloniaUI/Avalonia/issues/6085) ... so it runs fine but it does not accept file drop on Linux... sad.
+This app is developed as an [Avalonia UI](https://avaloniaui.net/) app and uses [Taglib#](https://github.com/mono/taglib-sharp) for metadata tag editing, so it should runs on Windows, ~~Linux~~, and Mac as well using .NET runtime. 
+
+However, it turnes out [Avalonia UI currently does not support file drag and drop on Linux](https://github.com/AvaloniaUI/Avalonia/issues/6085) ... so it runs fine but it does not accept file drop on Linux... sad.
 
 ## Download
 TODO
