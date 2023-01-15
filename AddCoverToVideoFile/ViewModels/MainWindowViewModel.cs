@@ -22,7 +22,7 @@ namespace AddCoverToVideoFile.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "AddCoverToVideoFile v1.0.0.3";
+        public string Greeting => "AddCoverToVideoFile v1.0.0.4";
 
         private string statusBarMessage;
 
@@ -148,7 +148,7 @@ namespace AddCoverToVideoFile.ViewModels
                     string fileName = System.IO.Path.GetFileName(filePath);
                     string fileExt = System.IO.Path.GetExtension(fileName);
 
-                    if ((fileExt.ToLower() == ".mp4") || (fileExt.ToLower() == ".mkv") || (fileExt.ToLower() == ".avi"))
+                    if ((fileExt.ToLower() == ".mp4") || (fileExt.ToLower() == ".mkv"))// || (fileExt.ToLower() == ".avi"))
                     {
                         VideoFilePath = filePath;
                         VideoFileName = fileName;

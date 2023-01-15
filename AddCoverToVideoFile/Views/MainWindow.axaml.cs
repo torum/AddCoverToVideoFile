@@ -44,20 +44,22 @@ namespace AddCoverToVideoFile.Views
                 AllowMultiple = true
             };
 
-            List<FileDialogFilter> Filters = new List<FileDialogFilter>();
-            FileDialogFilter filter = new FileDialogFilter();
+            var Filters = new List<FileDialogFilter>();
+            var filter = new FileDialogFilter();
 
-            List<string> extension = new List<string>();
-            extension.Add("mp4");
-            extension.Add("mkv");
-            extension.Add("avi");
-            extension.Add("jpg");
-            extension.Add("jpeg");
-            extension.Add("png");
+            List<string> extension = new()
+            {
+                "mp4",
+                "mkv",
+                //"avi",
+                "jpg",
+                "jpeg",
+                "png"
+            };
 
             filter.Extensions = extension;
-
-            openFileDialog.Filters.Add(filter);
+            Filters.Add(filter);
+            openFileDialog.Filters = Filters;
             var result = await openFileDialog.ShowAsync(this);
 
             if (result != null)
