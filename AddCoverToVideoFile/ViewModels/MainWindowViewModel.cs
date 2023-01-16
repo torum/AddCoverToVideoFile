@@ -22,7 +22,7 @@ namespace AddCoverToVideoFile.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "AddCoverToVideoFile v1.0.0.4";
+        public string Greeting => "AddCoverToVideoFile v1.0.0.5";
 
         private string statusBarMessage;
 
@@ -236,33 +236,22 @@ namespace AddCoverToVideoFile.ViewModels
                 {
                     TagLib.File file = TagLib.File.Create(VideoFilePath);
 
-                    /*
-                    string title = file.Tag.Title;
-                    TimeSpan duration = file.Properties.Duration;
-                    file.Tag.Title = "my new title";
-                    */
-
-                    /*
-                    file.Tag.Pictures = new TagLib.IPicture[] { new TagLib.Picture(@"C:\Users\torum\Desktop\test.jpg") };
-                    file.Save();
-                    */
-
                     TagLib.Picture picture = new TagLib.Picture(PictureFilePath);
-                    //picture.MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg;
-                    //picture.Type = TagLib.PictureType.FrontCover;
                     
-                    /*
-                    TagLib.Id3v2.AttachmentFrame cover = new TagLib.Id3v2.AttachmentFrame
+                    var ext = Path.GetExtension(PictureFilePath);
+                    if (!string.IsNullOrEmpty(ext))
                     {
-                        Type = TagLib.PictureType.FrontCover,
-                        Description = "Cover",
-                        MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg,
-                        //Data = imageBytes,
-                        TextEncoding = TagLib.StringType.UTF16
-                    };
-                    */
+                        if (ext.ToLower() == ".jpg" || ext.ToLower() == ".jpeg")
+                        { 
+                            picture.MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg;
+                        }
+                        else if (ext.ToLower() == ".png" )
+                        {
+                            picture.MimeType = "image/png";
+                        }
+                    }
 
-                    //file.Tag.Pictures = new TagLib.IPicture[] { picture };
+                    picture.Type = TagLib.PictureType.FrontCover;
                     
                     // Preserving other pictures
                     if (file.Tag.Pictures.Count() > 0)
@@ -296,6 +285,7 @@ namespace AddCoverToVideoFile.ViewModels
                             }
                             IsButtonEnabled = true;
                             StatusBarMessage = "Done";
+                            StatusBarErrorMessage = "";
                             IsBusy = false;
                         }, DispatcherPriority.Background);
 
