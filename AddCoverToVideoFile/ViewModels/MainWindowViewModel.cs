@@ -22,91 +22,91 @@ namespace AddCoverToVideoFile.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "AddCoverToVideoFile v1.0.0.5";
+        public string? Greeting => "AddCoverToVideoFile v1.0.0.5";
 
-        private string statusBarMessage;
+        private string? statusBarMessage;
 
-        public string StatusBarMessage
+        public string? StatusBarMessage
         {
             get => statusBarMessage;
             set => this.RaiseAndSetIfChanged(ref statusBarMessage, value);
         }
 
-        private string statusBarErrorMessage;
+        private string? statusBarErrorMessage;
 
-        public string StatusBarErrorMessage
+        public string? StatusBarErrorMessage
         {
             get => statusBarErrorMessage;
             set => this.RaiseAndSetIfChanged(ref statusBarErrorMessage, value);
         }
 
-        private string _defaultTextForPicture = "Drop a picture to add";
+        private string? _defaultTextForPicture = "Drop a picture to add";
 
-        public string DefaultTextForPicture
+        public string? DefaultTextForPicture
         {
             get => _defaultTextForPicture;
             set => this.RaiseAndSetIfChanged(ref _defaultTextForPicture, value);
         }
 
-        private string _defaultTextForVideo = "Drop a video file";
+        private string? _defaultTextForVideo = "Drop a video file";
 
-        public string DefaultTextForVideo
+        public string? DefaultTextForVideo
         {
             get => _defaultTextForVideo;
             set => this.RaiseAndSetIfChanged(ref _defaultTextForVideo, value);
         }
 
-        private string _videoFilePath;
-        public string VideoFilePath
+        private string? _videoFilePath;
+        public string? VideoFilePath
         {
             get => _videoFilePath;
             set => this.RaiseAndSetIfChanged(ref _videoFilePath, value);
         }
 
-        private string _pictureFilePath;
-        public string PictureFilePath
+        private string? _pictureFilePath;
+        public string? PictureFilePath
         {
             get => _pictureFilePath;
             set => this.RaiseAndSetIfChanged(ref _pictureFilePath, value);
         }
 
-        private string _videoFileName;
-        public string VideoFileName
+        private string? _videoFileName;
+        public string? VideoFileName
         {
             get => _videoFileName;
             set => this.RaiseAndSetIfChanged(ref _videoFileName, value);
         }
 
-        private string _pictureFileName;
-        public string PictureFileName
+        private string? _pictureFileName;
+        public string? PictureFileName
         {
             get => _pictureFileName;
             set => this.RaiseAndSetIfChanged(ref _pictureFileName, value);
         }
 
-        private Bitmap _albumArt;
-        public Bitmap AlbumArt
+        private Bitmap? _albumArt;
+        public Bitmap? AlbumArt
         {
             get => _albumArt;
             set => this.RaiseAndSetIfChanged(ref _albumArt, value);
         }
 
-        private Bitmap _newAlbumArt;
-        public Bitmap NewAlbumArt
+        private Bitmap? _newAlbumArt;
+        public Bitmap? NewAlbumArt
         {
             get => _newAlbumArt;
             private set => this.RaiseAndSetIfChanged(ref _newAlbumArt, value);
         }
 
-        private Bitmap _defaultDropImageForPicture;
-        public Bitmap DefaultDropImageForPicture
+        private Bitmap? _defaultDropImageForPicture;
+        public Bitmap? DefaultDropImageForPicture
         {
             get => _defaultDropImageForPicture;
             private set => this.RaiseAndSetIfChanged(ref _defaultDropImageForPicture, value);
         }
 
-        private Bitmap _defaultDropImageForVideo;
-        public Bitmap DefaultDropImageForVideo
+        private Bitmap? _defaultDropImageForVideo;
+        public Bitmap? DefaultDropImageForVideo
         {
             get => _defaultDropImageForVideo;
             private set => this.RaiseAndSetIfChanged(ref _defaultDropImageForVideo, value);
@@ -178,6 +178,21 @@ namespace AddCoverToVideoFile.ViewModels
                                 AlbumArt = bitmap;
                             }
                             */
+
+                            /* for WinUI3
+                            using (InMemoryRandomAccessStream ms = new InMemoryRandomAccessStream())
+                            {
+                                using (DataWriter writer = new DataWriter(ms.GetOutputStreamAt(0)))
+                                {
+                                    writer.WriteBytes(file.Tag.Pictures[0].Data.Data);
+                                    writer.StoreAsync().GetResults();
+                                }
+                                var bitmap = new BitmapImage();
+                                bitmap.SetSource(ms);
+                            
+                                AlbumArt = bitmap;
+                            }
+                            */
                         }
                         else
                         {
@@ -191,6 +206,7 @@ namespace AddCoverToVideoFile.ViewModels
                         DefaultTextForPicture = "";
                         DefaultDropImageForPicture = null;
 
+                        // for Avalonia UI
                         await LoadCover(filePath);
 
                         // for WPF
@@ -198,6 +214,12 @@ namespace AddCoverToVideoFile.ViewModels
                         ImageLoader imgLoader = new ImageLoader();
                         imgLoader.BmpImg = imgLoader.GetBitmapImage(PictureFilePath);
                         NewAlbumArt = imgLoader.BmpImg;
+                        */
+
+                        /* for WinUI3
+                        var bitmapImage = new BitmapImage();
+                        bitmapImage.SetSource(await storageFile.OpenAsync(FileAccessMode.Read));
+                        NewAlbumArt = bitmapImage;
                         */
                     }
                     else
@@ -330,7 +352,7 @@ namespace AddCoverToVideoFile.ViewModels
             }
         }
 
-        public async Task<Stream> LoadCoverBitmapAsync(string path)
+        public async Task<Stream?> LoadCoverBitmapAsync(string path)
         {
             if (File.Exists(path))
             {
