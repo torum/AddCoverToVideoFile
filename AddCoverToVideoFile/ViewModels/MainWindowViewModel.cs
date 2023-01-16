@@ -1,43 +1,35 @@
+using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using Avalonia.Threading;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Text;
-using Avalonia.Media.Imaging;
-using System.Threading.Tasks;
-using System.Net.Http;
 using System.Linq;
-using DynamicData;
-using Avalonia.Platform;
-using Avalonia;
+using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia.Threading;
-using Avalonia.Input;
-using Avalonia.ReactiveUI;
-using System.Reactive.Disposables;
-using SkiaSharp;
 
 namespace AddCoverToVideoFile.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string? Greeting => "AddCoverToVideoFile v1.0.0.5";
+        public static string? Greeting => "AddCoverToVideoFile v1.0.0.5";
 
-        private string? statusBarMessage;
+        private string? _statusBarMessage;
 
         public string? StatusBarMessage
         {
-            get => statusBarMessage;
-            set => this.RaiseAndSetIfChanged(ref statusBarMessage, value);
+            get => _statusBarMessage;
+            set => this.RaiseAndSetIfChanged(ref _statusBarMessage, value);
         }
 
-        private string? statusBarErrorMessage;
+        private string? _statusBarErrorMessage;
 
         public string? StatusBarErrorMessage
         {
-            get => statusBarErrorMessage;
-            set => this.RaiseAndSetIfChanged(ref statusBarErrorMessage, value);
+            get => _statusBarErrorMessage;
+            set => this.RaiseAndSetIfChanged(ref _statusBarErrorMessage, value);
         }
 
         private string? _defaultTextForPicture = "Drop a picture to add";
@@ -134,11 +126,16 @@ namespace AddCoverToVideoFile.ViewModels
             });
         }
 
-        public async void OnFileDrop(IEnumerable<string> filepaths)
+        public async void OnFileDrop(IEnumerable<string>? filepaths)
         {
+            if (filepaths == null)
+            {
+                return;
+            }
+
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
 
-            if (filepaths.Count() > 0)
+            if (filepaths.Any())
             {
                 StatusBarErrorMessage = "";
                 StatusBarMessage = "";
@@ -346,13 +343,11 @@ namespace AddCoverToVideoFile.ViewModels
 
         public async Task LoadCover(string path)
         {
-            await using (var imageStream = await LoadCoverBitmapAsync(path))
-            {
-                NewAlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(imageStream, 400));
-            }
+            await using var imageStream = await LoadCoverBitmapAsync(path);
+            NewAlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(imageStream, 400));
         }
 
-        public async Task<Stream?> LoadCoverBitmapAsync(string path)
+        public static async Task<Stream?> LoadCoverBitmapAsync(string path)
         {
             if (File.Exists(path))
             {

@@ -23,8 +23,11 @@ namespace AddCoverToVideoFile.Views
 
             this.Closing += (s, e) =>
             {
-                if ((DataContext as MainWindowViewModel).IsBusy)
-                    e.Cancel = true;
+                if (DataContext != null)
+                {
+                    if (((MainWindowViewModel)DataContext).IsBusy)
+                        e.Cancel = true;
+                }
             };
         }
 
@@ -32,7 +35,10 @@ namespace AddCoverToVideoFile.Views
         {
             if (e.Data.Contains(DataFormats.FileNames))
             {
-                (DataContext as MainWindowViewModel).OnFileDrop(e.Data.GetFileNames());
+                if (DataContext != null)
+                {
+                    ((MainWindowViewModel)DataContext).OnFileDrop(filepaths: e.Data.GetFileNames());
+                }
             }
         }
 
@@ -64,7 +70,10 @@ namespace AddCoverToVideoFile.Views
 
             if (result != null)
             {
-                (DataContext as MainWindowViewModel).OnFileDrop(result);
+                if (DataContext != null)
+                {
+                    ((MainWindowViewModel)DataContext).OnFileDrop(result);
+                }
             }
         }
     }
