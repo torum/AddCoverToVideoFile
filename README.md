@@ -5,6 +5,8 @@ This app is developed as an [Avalonia UI](https://avaloniaui.net/) app and uses 
 
 However, it turnes out [Avalonia UI currently does not support file drag and drop on Linux](https://github.com/AvaloniaUI/Avalonia/issues/6085) ... so it runs fine but it does not accept file drop on Linux... Sad. You have to manually select files using a file open button on Linux.
 
+Also, what I learned is that metadata "tags" in movie files are pretty messed up. There is no standard at all. This is beyond sad state.  
+
 ## Download
 TODO
 
