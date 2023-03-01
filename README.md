@@ -15,5 +15,3 @@ TODO
 ## Screenshots
 
 ![AddCoverToVideoFile](https://github.com/torum/AddCoverToVideoFile/blob/main/files/screenshots/screenshots.jpg?raw=true)
-
-![AddCoverToVideoFile](https://github.com/torum/AddCoverToVideoFile/blob/main/files/screenshots/screenshots2.png?raw=true)
