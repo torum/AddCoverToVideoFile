@@ -15,7 +15,7 @@
         Background="Transparent"
 		ExtendClientAreaToDecorationsHint="False"
 		ExtendClientAreaChromeHints="PreferSystemChrome"
-		HasSystemDecorations ="True">
+		SystemDecorations ="Full">
 	<Window.Styles>
 		<Style Selector="TextBox">
 			<Setter Property="FontSize" Value="12"/>

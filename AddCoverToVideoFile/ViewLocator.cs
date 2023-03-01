@@ -7,8 +7,16 @@ namespace AddCoverToVideoFile
 {
     public class ViewLocator : IDataTemplate
     {
-        public IControl Build(object data)
+#if (AvaloniaStableChosen)
+    public IControl Build(object data)
+#else
+        public Control Build(object? data)
+#endif
         {
+            if (data is null)
+                return new TextBlock { Text = "" };
+
+
             var name = data.GetType().FullName!.Replace("ViewModel", "View");
             var type = Type.GetType(name);
 
@@ -16,13 +24,11 @@ namespace AddCoverToVideoFile
             {
                 return (Control)Activator.CreateInstance(type)!;
             }
-            else
-            {
-                return new TextBlock { Text = "Not Found: " + name };
-            }
+
+            return new TextBlock { Text = "Not Found: " + name };
         }
 
-        public bool Match(object data)
+        public bool Match(object? data)
         {
             return data is ViewModelBase;
         }
