@@ -1,15 +1,14 @@
+using AddCoverToVideoFile.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Input;
-using System.Diagnostics;
-using System;
-using AddCoverToVideoFile.ViewModels;
-using System.Collections.Immutable;
-using Avalonia.ReactiveUI;
-using System.Reactive.Disposables;
-using ReactiveUI;
-using System.Reactive.Linq;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
+using Avalonia.ReactiveUI;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 
 namespace AddCoverToVideoFile.Views
 {
@@ -31,48 +30,70 @@ namespace AddCoverToVideoFile.Views
             };
         }
 
-        private void Drop(object sender, DragEventArgs e)
+        private void Drop(object? sender, DragEventArgs e)
         {
-            if (e.Data.Contains(DataFormats.FileNames))
+            if (e.Data.Contains(DataFormats.Files))
             {
                 if (DataContext != null)
                 {
-                    ((MainWindowViewModel)DataContext).OnFileDrop(filepaths: e.Data.GetFileNames());
+                    var files = e.Data.GetFiles();
+                    if (files is not null)
+                    {
+                        List<string> hoge = new();
+                        foreach (var fuga in files)
+                        {
+                            hoge.Add(fuga.Path.AbsolutePath);
+                        }
+
+                        ((MainWindowViewModel)DataContext).OnFileDrop(filepaths: hoge);
+                    }
                 }
             }
         }
 
         private async void OnFileOpenButtonClicked(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog()
+            var openFileDialog = new FilePickerOpenOptions()//OpenFileDialog()
             {
                 Title = "Select movie file and picture",
                 AllowMultiple = true
             };
 
-            var Filters = new List<FileDialogFilter>();
-            var filter = new FileDialogFilter();
+            //var Filters = new List<FileDialogFilter>();
+            //var filter = new FileDialogFilter();
 
-            List<string> extension = new()
+            //List<string> extension = new()
+            //{
+            //    "mp4",
+            //    "mkv",
+            //    //"avi",
+            //    "jpg",
+            //    "jpeg",
+            //    "png"
+            //};
+
+            //filter.Extensions = extension;
+            //Filters.Add(filter);
+            //openFileDialog.Filters = Filters;
+            var type = new FilePickerFileType("files (*.mp4; *.mkv; *.jpg; *.jpeg; *.png)")
             {
-                "mp4",
-                "mkv",
-                //"avi",
-                "jpg",
-                "jpeg",
-                "png"
+                Patterns = new string[] { "*.sln", "*.csproj" }
             };
+            openFileDialog.FileTypeFilter = new FilePickerFileType[] { type };
 
-            filter.Extensions = extension;
-            Filters.Add(filter);
-            openFileDialog.Filters = Filters;
-            var result = await openFileDialog.ShowAsync(this);
-
+            //var result = await openFileDialog.ShowAsync(this);
+            var result = await StorageProvider.OpenFilePickerAsync(openFileDialog);
             if (result != null)
             {
                 if (DataContext != null)
                 {
-                    ((MainWindowViewModel)DataContext).OnFileDrop(result);
+                    List<string> hoge = new();
+                    foreach (var filePath in result)
+                    {
+                        hoge.Add(filePath.Path.AbsolutePath);
+                    }
+
+                    ((MainWindowViewModel)DataContext).OnFileDrop(hoge);
                 }
             }
         }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Input;
 
 namespace AddCoverToVideoFile.ViewModels
@@ -104,6 +105,13 @@ namespace AddCoverToVideoFile.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _defaultDropImageForVideo, value);
         }
 
+        private string _title = string.Empty;
+        public string Title
+        {
+            get => _title;
+            private set => this.RaiseAndSetIfChanged(ref _title, value);
+        }
+
         private bool _isButtonEnabled = false;
         public bool IsButtonEnabled
         {
@@ -126,7 +134,7 @@ namespace AddCoverToVideoFile.ViewModels
             });
         }
 
-        public async void OnFileDrop(IEnumerable<string>? filepaths)
+        public async void OnFileDrop(IEnumerable<string>? filepaths)//IReadOnlyList<IStorageFile>? filepaths
         {
             if (filepaths == null)
             {
@@ -142,25 +150,26 @@ namespace AddCoverToVideoFile.ViewModels
 
                 foreach (var filePath in filepaths)
                 {
-                    string fileName = System.IO.Path.GetFileName(filePath);
+                    string fileName = HttpUtility.UrlDecode(System.IO.Path.GetFileName(filePath));//filePath.Name;//
                     string fileExt = System.IO.Path.GetExtension(fileName);
 
                     if ((fileExt.ToLower() == ".mp4") || (fileExt.ToLower() == ".mkv"))// || (fileExt.ToLower() == ".avi"))
                     {
-                        VideoFilePath = filePath;
+                        VideoFilePath = HttpUtility.UrlDecode(filePath);//filePath;.Path.AbsolutePath;
                         VideoFileName = fileName;
                         AlbumArt = null;
                         DefaultTextForVideo = "";
 
                         TagLib.File file = TagLib.File.Create(VideoFilePath);
 
+                        // Reads title
+                        Title = file.Tag.Title;
+
                         if (file.Tag.Pictures.Length > 0)
                         {
                             // for Avalonia UI
-                            using (var stream = new MemoryStream(file.Tag.Pictures[0].Data.Data))
-                            {
-                                AlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(stream, 400));
-                            }
+                            using var stream = new MemoryStream(file.Tag.Pictures[0].Data.Data);
+                            AlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(stream, 400));
 
                             /* for WPF
                             using (var stream = new MemoryStream(file.Tag.Pictures[0].Data.Data))
@@ -198,13 +207,13 @@ namespace AddCoverToVideoFile.ViewModels
                     }
                     else if ((fileExt.ToLower() == ".jpg") || (fileExt.ToLower() == ".jpeg") || (fileExt.ToLower() == ".png"))
                     {
-                        PictureFilePath = filePath;
-                        PictureFileName = System.IO.Path.GetFileName(filePath);
+                        PictureFilePath = HttpUtility.UrlDecode(filePath);// filePath;//.Path.AbsolutePath;
+                        PictureFileName = fileName; //filePath.Name;
                         DefaultTextForPicture = "";
                         DefaultDropImageForPicture = null;
 
                         // for Avalonia UI
-                        await LoadCover(filePath);
+                        await LoadCover(PictureFilePath);
 
                         // for WPF
                         /*
@@ -255,7 +264,10 @@ namespace AddCoverToVideoFile.ViewModels
                 {
                     TagLib.File file = TagLib.File.Create(VideoFilePath);
 
-                    TagLib.Picture picture = new TagLib.Picture(PictureFilePath);
+                    // Sets title.
+                    file.Tag.Title = Title;
+
+                    TagLib.Picture picture = new(PictureFilePath);
                     
                     var ext = Path.GetExtension(PictureFilePath);
                     if (!string.IsNullOrEmpty(ext))
@@ -273,7 +285,7 @@ namespace AddCoverToVideoFile.ViewModels
                     picture.Type = TagLib.PictureType.FrontCover;
                     
                     // Preserving other pictures
-                    if (file.Tag.Pictures.Count() > 0)
+                    if (file.Tag.Pictures.Length > 0)
                     {
                         file.Tag.Pictures[0] = picture;
                     }
