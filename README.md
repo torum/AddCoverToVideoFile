@@ -10,7 +10,7 @@ In order to show video thumbnails/cover pictures in Ubuntu's file manager "Nauti
 Also, what I learned is that metadata "tags" for movie files in general are pretty messed up. There is no standard at all. This is beyond sad state.  
 
 ## Remark
-The project file is targeting Avalonia version="11.0.0-preview5" (current). 
+The project file is targeting Avalonia version="11.0.0-preview6" (current). 
 
 ## Download
 TODO
