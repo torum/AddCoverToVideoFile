@@ -123,9 +123,11 @@ namespace AddCoverToVideoFile.ViewModels
 
         public MainWindowViewModel()
         {
-            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-            DefaultDropImageForPicture = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
-            DefaultDropImageForVideo = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
+            //var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+            //DefaultDropImageForPicture = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
+            DefaultDropImageForPicture = new Bitmap(AssetLoader.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
+            //DefaultDropImageForVideo = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
+            DefaultDropImageForVideo = new Bitmap(AssetLoader.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
 
             ApplyAndSaveCommand = ReactiveCommand.Create( () =>
             {
@@ -141,7 +143,7 @@ namespace AddCoverToVideoFile.ViewModels
                 return;
             }
 
-            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+            //var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
 
             if (filepaths.Any())
             {
@@ -202,7 +204,8 @@ namespace AddCoverToVideoFile.ViewModels
                         }
                         else
                         {
-                            DefaultDropImageForVideo = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/video2.png")));
+                            //DefaultDropImageForVideo = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/video2.png")));
+                            DefaultDropImageForVideo = new Bitmap(AssetLoader.Open(new Uri("avares://AddCoverToVideoFile/Assets/video2.png")));
                         }
                     }
                     else if ((fileExt.ToLower() == ".jpg") || (fileExt.ToLower() == ".jpeg") || (fileExt.ToLower() == ".png"))
@@ -356,7 +359,10 @@ namespace AddCoverToVideoFile.ViewModels
         public async Task LoadCover(string path)
         {
             await using var imageStream = await LoadCoverBitmapAsync(path);
-            NewAlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(imageStream, 400));
+            if (imageStream != null)
+            {
+                NewAlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(imageStream, 400));
+            }
         }
 
         public static async Task<Stream?> LoadCoverBitmapAsync(string path)

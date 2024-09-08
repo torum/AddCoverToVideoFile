@@ -11,11 +11,12 @@
 		DragDrop.AllowDrop="True"
 		WindowStartupLocation="CenterScreen"
         Title="{Binding Greeting}"
-		TransparencyLevelHint="AcrylicBlur"
-        Background="Transparent"
+
 		ExtendClientAreaToDecorationsHint="False"
 		ExtendClientAreaChromeHints="PreferSystemChrome"
 		SystemDecorations ="Full">
+	<!-- 		TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent" -->
 	<Window.Styles>
 		<Style Selector="TextBox">
 			<Setter Property="FontSize" Value="12"/>
@@ -27,7 +28,7 @@
     </Design.DataContext>
 	
 	<Panel>
-		<ExperimentalAcrylicBorder IsHitTestVisible="False">
+		<!--		<ExperimentalAcrylicBorder IsHitTestVisible="False">
 			<ExperimentalAcrylicBorder.Material>
 				<ExperimentalAcrylicMaterial
 					BackgroundSource="Digger"
@@ -35,7 +36,7 @@
 					TintOpacity="1"
 					MaterialOpacity="0.65" />
 			</ExperimentalAcrylicBorder.Material>
-		</ExperimentalAcrylicBorder>
+		</ExperimentalAcrylicBorder>-->
 
 		<Grid RowDefinitions="Auto,360,74,30" Margin="12,0,12,0">
 			<!-- 
