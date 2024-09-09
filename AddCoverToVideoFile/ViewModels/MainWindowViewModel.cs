@@ -15,7 +15,7 @@ namespace AddCoverToVideoFile.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public static string? Greeting => "AddCoverToVideoFile v1.0.0.5";
+        public static string? Greeting => "AddCoverToVideoFile v1.0.0.6";
 
         private string? _statusBarMessage;
 

@@ -77,7 +77,7 @@ namespace AddCoverToVideoFile.Views
             //openFileDialog.Filters = Filters;
             var type = new FilePickerFileType("files (*.mp4; *.mkv; *.jpg; *.jpeg; *.png)")
             {
-                Patterns = new string[] { "*.sln", "*.csproj" }
+                Patterns = new string[] { "*.mp4", "*.mkv", "*.jpg", "*.jpeg", "*.png" }
             };
             openFileDialog.FileTypeFilter = new FilePickerFileType[] { type };
 
