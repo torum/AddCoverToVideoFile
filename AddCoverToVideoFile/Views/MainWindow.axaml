@@ -27,7 +27,8 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 	
-	<Panel>
+	<Grid>
+		<Border x:Name="BackgroundLayerBorder" Background="#131313" Opacity="0" IsVisible="False"></Border>
 		<!--		<ExperimentalAcrylicBorder IsHitTestVisible="False">
 			<ExperimentalAcrylicBorder.Material>
 				<ExperimentalAcrylicMaterial
@@ -90,5 +91,5 @@
 				</Grid>
 			</Border>
 		</Grid>
-	</Panel>
+	</Grid>
 </Window>

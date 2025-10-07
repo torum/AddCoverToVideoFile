@@ -32,8 +32,13 @@ namespace AddCoverToVideoFile
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                if ((desktop.MainWindow.DataContext as MainWindowViewModel).IsBusy)
-                    e.Cancel = true;
+                if (desktop.MainWindow?.DataContext is MainWindowViewModel vm)
+                {
+                    if (vm.IsBusy)
+                    {
+                        e.Cancel = true;
+                    }
+                }
             } 
         }
     }

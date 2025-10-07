@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using DynamicData;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace AddCoverToVideoFile.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public static string? Greeting => "AddCoverToVideoFile v1.0.0.6";
+        public static string? Greeting => "AddCoverToVideoFile v1.0.0.7";
 
         private string? _statusBarMessage;
 
@@ -155,7 +156,7 @@ namespace AddCoverToVideoFile.ViewModels
                     string fileName = HttpUtility.UrlDecode(System.IO.Path.GetFileName(filePath));//filePath.Name;//
                     string fileExt = System.IO.Path.GetExtension(fileName);
 
-                    if ((fileExt.ToLower() == ".mp4") || (fileExt.ToLower() == ".mkv"))// || (fileExt.ToLower() == ".avi"))
+                    if ((fileExt.Equals(".mp4", StringComparison.OrdinalIgnoreCase)) || (fileExt.Equals(".mkv", StringComparison.OrdinalIgnoreCase)))// || (fileExt.ToLower() == ".avi"))
                     {
                         VideoFilePath = HttpUtility.UrlDecode(filePath);//filePath;.Path.AbsolutePath;
                         VideoFileName = fileName;
@@ -201,14 +202,17 @@ namespace AddCoverToVideoFile.ViewModels
                                 AlbumArt = bitmap;
                             }
                             */
+
                         }
                         else
                         {
                             //DefaultDropImageForVideo = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/video2.png")));
                             DefaultDropImageForVideo = new Bitmap(AssetLoader.Open(new Uri("avares://AddCoverToVideoFile/Assets/video2.png")));
                         }
+
+                        file.Dispose();
                     }
-                    else if ((fileExt.ToLower() == ".jpg") || (fileExt.ToLower() == ".jpeg") || (fileExt.ToLower() == ".png"))
+                    else if ((fileExt.Equals(".jpg", StringComparison.OrdinalIgnoreCase)) || (fileExt.Equals(".jpeg", StringComparison.OrdinalIgnoreCase)) || (fileExt.Equals(".png", StringComparison.OrdinalIgnoreCase)))
                     {
                         PictureFilePath = HttpUtility.UrlDecode(filePath);// filePath;//.Path.AbsolutePath;
                         PictureFileName = fileName; //filePath.Name;
@@ -275,27 +279,31 @@ namespace AddCoverToVideoFile.ViewModels
                     var ext = Path.GetExtension(PictureFilePath);
                     if (!string.IsNullOrEmpty(ext))
                     {
-                        if (ext.ToLower() == ".jpg" || ext.ToLower() == ".jpeg")
+                        if (ext.Equals(".jpg", StringComparison.OrdinalIgnoreCase) || ext.Equals(".jpeg", StringComparison.OrdinalIgnoreCase))
                         { 
                             picture.MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg;
                         }
-                        else if (ext.ToLower() == ".png" )
+                        else if (ext.Equals(".png", StringComparison.OrdinalIgnoreCase))
                         {
-                            picture.MimeType = "image/png";
+                            picture.MimeType = System.Net.Mime.MediaTypeNames.Image.Png;//"image/png";
                         }
                     }
 
                     picture.Type = TagLib.PictureType.FrontCover;
-                    
                     // Preserving other pictures
                     if (file.Tag.Pictures.Length > 0)
                     {
-                        file.Tag.Pictures[0] = picture;
+                        //file.Tag.Pictures[0] = picture;
+                        var tmp = file.Tag.Pictures;
+                        tmp[0] = picture;
+                        file.Tag.Pictures = tmp;
                     }
                     else
                     {
-                        file.Tag.Pictures = new TagLib.IPicture[] { picture };
+                        //file.Tag.Pictures = new TagLib.IPicture[] { picture };
+                        file.Tag.Pictures = [picture];
                     }
+                    //file.Tag.Pictures = [picture];
 
                     try
                     {
@@ -336,6 +344,11 @@ namespace AddCoverToVideoFile.ViewModels
                         }, DispatcherPriority.Background);
                         
                         return false;
+                    }
+                    finally
+                    {
+                        //
+                        file.Dispose();
                     }
                 }
                 catch (Exception e)
