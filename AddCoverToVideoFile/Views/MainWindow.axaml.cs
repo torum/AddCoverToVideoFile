@@ -4,13 +4,14 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
-using Avalonia.ReactiveUI;
 using Avalonia.Styling;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 
