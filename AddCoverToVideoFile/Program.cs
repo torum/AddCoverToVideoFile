@@ -1,6 +1,8 @@
 using Avalonia;
+using ReactiveUI;
 using ReactiveUI.Avalonia;
 using System;
+using System.Reflection;
 
 namespace AddCoverToVideoFile
 {
@@ -18,6 +20,11 @@ namespace AddCoverToVideoFile
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .LogToTrace()
-                .UseReactiveUI();
+                .UseReactiveUI(rxAppBuilder =>
+                {
+                    // Enable ReactiveUI
+                    rxAppBuilder
+                      .WithViewsFromAssembly(Assembly.GetExecutingAssembly());
+                }).RegisterReactiveUIViewsFromEntryAssembly();
     }
 }
