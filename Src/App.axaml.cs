@@ -2,7 +2,10 @@ using AddCoverToVideoFile.ViewModels;
 using AddCoverToVideoFile.Views;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Data.Core;
+using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using System.Linq;
 
 namespace AddCoverToVideoFile
 {
@@ -21,25 +24,9 @@ namespace AddCoverToVideoFile
                 {
                     DataContext = new MainWindowViewModel(),
                 };
-
-                desktop.ShutdownRequested += Desktop_ShutdownRequested;
             }
 
             base.OnFrameworkInitializationCompleted();
-        }
-
-        private void Desktop_ShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
-        {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                if (desktop.MainWindow?.DataContext is MainWindowViewModel vm)
-                {
-                    if (vm.IsBusy)
-                    {
-                        e.Cancel = true;
-                    }
-                }
-            } 
         }
     }
 }

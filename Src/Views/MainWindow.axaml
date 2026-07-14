@@ -5,46 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="536"
         x:Class="AddCoverToVideoFile.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-		Width="888" MinWidth="888"
+        x:DataType="vm:MainWindowViewModel"
+        Width="888" MinWidth="888"
 		Height="470" MinHeight="470"
 		DragDrop.AllowDrop="True"
-		WindowStartupLocation="CenterScreen"
-        Title="{Binding Greeting}"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="AddCoverToVideoFile v1.0.0.8">
 
-		ExtendClientAreaToDecorationsHint="False"
-		ExtendClientAreaChromeHints="PreferSystemChrome"
-		SystemDecorations ="Full">
-	<!-- 		TransparencyLevelHint="AcrylicBlur"
-        Background="Transparent" -->
-	<Window.Styles>
-		<Style Selector="TextBox">
-			<Setter Property="FontSize" Value="12"/>
-			<Setter Property="FontWeight" Value="Bold"/>
-		</Style>
-	</Window.Styles>
     <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-	
+
 	<Grid>
 		<Border x:Name="BackgroundLayerBorder" Background="#131313" Opacity="0" IsVisible="False"></Border>
-		<!--		<ExperimentalAcrylicBorder IsHitTestVisible="False">
-			<ExperimentalAcrylicBorder.Material>
-				<ExperimentalAcrylicMaterial
-					BackgroundSource="Digger"
-					TintColor="Black"
-					TintOpacity="1"
-					MaterialOpacity="0.65" />
-			</ExperimentalAcrylicBorder.Material>
-		</ExperimentalAcrylicBorder>-->
 
 		<Grid RowDefinitions="Auto,360,74,30" Margin="12,0,12,0">
-			<!-- 
-			<Grid Grid.Row="0" Height="74">
-				<TextBox Text="{Binding Title}" VerticalAlignment="Center"></TextBox>
-			</Grid>
-			-->
 
 			<Grid Grid.Row="1" RowDefinitions="Auto,Auto" ColumnDefinitions="1*,48,1*" Margin="4,48,4,4">
 
@@ -92,4 +69,5 @@
 			</Border>
 		</Grid>
 	</Grid>
+
 </Window>
