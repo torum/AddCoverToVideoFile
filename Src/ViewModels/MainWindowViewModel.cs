@@ -14,6 +14,12 @@ namespace AddCoverToVideoFile.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
+    public MainWindowViewModel()
+    {
+        DefaultDropImageForPicture = new Bitmap(AssetLoader.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
+        DefaultDropImageForVideo = new Bitmap(AssetLoader.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
+    }
+
     public bool IsBusy
     {
         get;
@@ -69,27 +75,15 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsButtonEnabled { get; set; }
 
-    public MainWindowViewModel()
-    {
-        DefaultDropImageForPicture = new Bitmap(AssetLoader.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
-        DefaultDropImageForVideo = new Bitmap(AssetLoader.Open(new Uri("avares://AddCoverToVideoFile/Assets/drop2.png")));
-        /*
-        ApplyAndSaveCommand = ReactiveCommand.Create(() =>
-        {
-            //await OnSave();
-            Task.Run(() => OnSave());
-        });
-        */
-    }
 
     [RelayCommand(CanExecute = nameof(CanApplyAndSave))]
-    public void ApplyAndSave()
+    public async Task ApplyAndSave()
     {
         //await OnSave();
-        Task.Run(() => OnSave());
+        await Task.Run(() => OnSave());
     }
 
-    private bool CanApplyAndSave()
+    private static bool CanApplyAndSave()
     {
         return true;
     }
