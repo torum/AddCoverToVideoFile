@@ -141,7 +141,7 @@ public partial class MainWindow : Window
         */
     }
 
-    private void Drop(object? sender, DragEventArgs e)
+    private async void Drop(object? sender, DragEventArgs e)
     {
         if (e.DataTransfer is null)
         {
@@ -165,7 +165,7 @@ public partial class MainWindow : Window
 
                 if (this.DataContext is MainWindowViewModel vm)
                 {
-                    vm.OnFileDrop(filepaths: droppedFiles);
+                    await vm.FileDropCommand.ExecuteAsync(droppedFiles);
                 }
             }
         }
@@ -228,13 +228,31 @@ public partial class MainWindow : Window
         {
             if (DataContext != null)
             {
-                List<string> hoge = [];
-                foreach (var filePath in result)
+                List<string> localPaths = [];
+                bool hasNonLocalFiles = false;
+                foreach (var file in result)
                 {
-                    hoge.Add(filePath.Path.AbsolutePath);
+                    var localPath = file.TryGetLocalPath();
+                    if (localPath is null)
+                    {
+                        hasNonLocalFiles = true;
+                        continue;
+                    }
+
+                    localPaths.Add(localPath);
                 }
 
-                ((MainWindowViewModel)DataContext).OnFileDrop(hoge);
+                if (DataContext is MainWindowViewModel vm)
+                {
+                    await vm.FileDropCommand.ExecuteAsync(localPaths);
+                    if (hasNonLocalFiles)
+                    {
+                        const string message = "Some selected files are not available as local files.";
+                        vm.StatusBarErrorMessage = string.IsNullOrEmpty(vm.StatusBarErrorMessage)
+                            ? message
+                            : $"{vm.StatusBarErrorMessage} {message}";
+                    }
+                }
             }
         }
     }

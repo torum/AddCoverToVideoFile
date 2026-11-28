@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace AddCoverToVideoFile.ViewModels;
 
@@ -30,6 +29,8 @@ public partial class MainWindowViewModel : ObservableObject
 
             field = value;
             OnPropertyChanged();
+            ApplyAndSaveCommand.NotifyCanExecuteChanged();
+            FileDropCommand.NotifyCanExecuteChanged();
         }
     }
 
@@ -43,16 +44,18 @@ public partial class MainWindowViewModel : ObservableObject
     public partial string? DefaultTextForPicture { get; set; } = "Drop a picture to add";
 
     [ObservableProperty]
-    public partial string? DefaultTextForVideo {  get; set; } = "Drop a video file";
+    public partial string? DefaultTextForVideo { get; set; } = "Drop a video file";
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyAndSaveCommand))]
     public partial string? VideoFilePath { get; set; }
 
     [ObservableProperty]
-    public partial string? PictureFilePath {  get; set; }
+    [NotifyCanExecuteChangedFor(nameof(ApplyAndSaveCommand))]
+    public partial string? PictureFilePath { get; set; }
 
     [ObservableProperty]
-    public partial string? VideoFileName { get; set;  }
+    public partial string? VideoFileName { get; set; }
 
     [ObservableProperty]
     public partial string? PictureFileName { get; set; }
@@ -79,154 +82,168 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanApplyAndSave))]
     public async Task ApplyAndSave()
     {
-        //await OnSave();
-        await Task.Run(() => OnSave());
+        if (!CanApplyAndSave())
+        {
+            return;
+        }
+
+        var videoFilePath = VideoFilePath!;
+        var pictureFilePath = PictureFilePath!;
+        var title = Title;
+
+        IsBusy = true;
+        IsButtonEnabled = false;
+        StatusBarErrorMessage = "";
+        StatusBarMessage = "Saving...";
+
+        await Task.Run(() => OnSave(videoFilePath, pictureFilePath, title));
     }
 
-    private static bool CanApplyAndSave()
+    private bool CanApplyAndSave()
     {
-        return true;
+        return !string.IsNullOrEmpty(VideoFilePath)
+            && !string.IsNullOrEmpty(PictureFilePath)
+            && !IsBusy;
     }
 
-    private async Task<bool> OnSave()
+    private bool CanProcessFiles() => !IsBusy;
+
+    private async Task<bool> OnSave(string videoFilePath, string pictureFilePath, string title)
     {
         // https://github.com/mono/taglib-sharp/blob/master/examples/SetPictures/SetPictures.cs
 
-        Dispatcher.UIThread.Post(() => { StatusBarMessage = "Saving..."; }, DispatcherPriority.Send);
-
-        if (!string.IsNullOrEmpty(VideoFilePath) && !string.IsNullOrEmpty(PictureFilePath))
+        try
         {
-            Dispatcher.UIThread.Post(() => { IsBusy = true; IsButtonEnabled = false; }, DispatcherPriority.Send);
+            using TagLib.File file = TagLib.File.Create(videoFilePath);
+
+            // Sets title.
+            file.Tag.Title = title;
+
+            TagLib.Picture picture = new(pictureFilePath);
+
+            var ext = System.IO.Path.GetExtension(pictureFilePath);
+            if (!string.IsNullOrEmpty(ext))
+            {
+                if (ext.Equals(".jpg", StringComparison.OrdinalIgnoreCase) || ext.Equals(".jpeg", StringComparison.OrdinalIgnoreCase))
+                {
+                    picture.MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg;
+                }
+                else if (ext.Equals(".png", StringComparison.OrdinalIgnoreCase))
+                {
+                    picture.MimeType = System.Net.Mime.MediaTypeNames.Image.Png;//"image/png";
+                }
+            }
+
+            picture.Type = TagLib.PictureType.FrontCover;
+            // Preserving other pictures
+            if (file.Tag.Pictures.Length > 0)
+            {
+                //file.Tag.Pictures[0] = picture;
+                var tmp = file.Tag.Pictures;
+                tmp[0] = picture;
+                file.Tag.Pictures = tmp;
+            }
+            else
+            {
+                //file.Tag.Pictures = new TagLib.IPicture[] { picture };
+                file.Tag.Pictures = [picture];
+            }
+            //file.Tag.Pictures = [picture];
 
             try
             {
-                TagLib.File file = TagLib.File.Create(VideoFilePath);
+                // TODO: save as .tmp then replace it.
+                //var tmpFile = Path.ChangeExtension(VideoFilePath, ".bak");
+                //System.IO.File.Copy(VideoFilePath, tmpFile);
 
-                // Sets title.
-                file.Tag.Title = Title;
+                file.Save();
 
-                TagLib.Picture picture = new(PictureFilePath);
+                await Task.Delay(30);
 
-                var ext = System.IO.Path.GetExtension(PictureFilePath);
-                if (!string.IsNullOrEmpty(ext))
+                // TODO: delete tmp file.
+                //System.IO.File.Delete(tmpFile);
+
+                var albumArtData = file.Tag.Pictures[0].Data.Data;
+                var albumArt = await Task.Run(() =>
                 {
-                    if (ext.Equals(".jpg", StringComparison.OrdinalIgnoreCase) || ext.Equals(".jpeg", StringComparison.OrdinalIgnoreCase))
-                    {
-                        picture.MimeType = System.Net.Mime.MediaTypeNames.Image.Jpeg;
-                    }
-                    else if (ext.Equals(".png", StringComparison.OrdinalIgnoreCase))
-                    {
-                        picture.MimeType = System.Net.Mime.MediaTypeNames.Image.Png;//"image/png";
-                    }
-                }
+                    using var stream = new MemoryStream(albumArtData);
+                    return Bitmap.DecodeToWidth(stream, 400);
+                });
 
-                picture.Type = TagLib.PictureType.FrontCover;
-                // Preserving other pictures
-                if (file.Tag.Pictures.Length > 0)
+                Dispatcher.UIThread.Post(() =>
                 {
-                    //file.Tag.Pictures[0] = picture;
-                    var tmp = file.Tag.Pictures;
-                    tmp[0] = picture;
-                    file.Tag.Pictures = tmp;
-                }
-                else
-                {
-                    //file.Tag.Pictures = new TagLib.IPicture[] { picture };
-                    file.Tag.Pictures = [picture];
-                }
-                //file.Tag.Pictures = [picture];
+                    AlbumArt = albumArt;
+                    IsButtonEnabled = true;
+                    StatusBarMessage = "Done";
+                    StatusBarErrorMessage = "";
+                    IsBusy = false;
+                }, DispatcherPriority.Background);
 
-                try
-                {
-                    // TODO: save as .tmp then replace it.
-                    //var tmpFile = Path.ChangeExtension(VideoFilePath, ".bak");
-                    //System.IO.File.Copy(VideoFilePath, tmpFile);
-
-                    file.Save();
-
-                    await Task.Delay(30);
-
-                    // TODO: delete tmp file.
-                    //System.IO.File.Delete(tmpFile);
-
-                    Dispatcher.UIThread.Post(async () =>
-                    {
-                        // Load pic for visula confirmation.
-                        using (var stream = new MemoryStream(file.Tag.Pictures[0].Data.Data))
-                        {
-                            AlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(stream, 400));
-                        }
-                        IsButtonEnabled = true;
-                        StatusBarMessage = "Done";
-                        StatusBarErrorMessage = "";
-                        IsBusy = false;
-                    }, DispatcherPriority.Background);
-
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        IsButtonEnabled = true;
-                        StatusBarErrorMessage = string.Format("Error trying to save file:  {0}", e.Message);
-                        StatusBarMessage = "Error";
-                        IsBusy = false;
-                    }, DispatcherPriority.Background);
-
-                    return false;
-                }
-                finally
-                {
-                    //
-                    file.Dispose();
-                }
+                return true;
             }
             catch (Exception e)
             {
                 Dispatcher.UIThread.Post(() =>
                 {
                     IsButtonEnabled = true;
-                    StatusBarErrorMessage = string.Format("Error trying to open file:  {0}", e.Message);
+                    StatusBarErrorMessage = string.Format("Error trying to save file:  {0}", e.Message);
                     StatusBarMessage = "Error";
                     IsBusy = false;
                 }, DispatcherPriority.Background);
+
                 return false;
             }
         }
-        else
+        catch (Exception e)
         {
+            Dispatcher.UIThread.Post(() =>
+            {
+                IsButtonEnabled = true;
+                StatusBarErrorMessage = string.Format("Error trying to open file:  {0}", e.Message);
+                StatusBarMessage = "Error";
+                IsBusy = false;
+            }, DispatcherPriority.Background);
             return false;
         }
     }
 
-    public async void OnFileDrop(IEnumerable<string>? filepaths)//IReadOnlyList<IStorageFile>? filepaths
+    [RelayCommand(CanExecute = nameof(CanProcessFiles))]
+    public async Task OnFileDropAsync(IEnumerable<string>? filepaths)//IReadOnlyList<IStorageFile>? filepaths
     {
-        if (filepaths == null)
+        if (filepaths == null || IsBusy)
         {
             return;
         }
 
-        //var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+        IsBusy = true;
 
-        if (filepaths.Any())
+        try
         {
+            //var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+
+            var paths = filepaths.ToList();
+            if (paths.Count == 0)
+            {
+                return;
+            }
+
+            IsButtonEnabled = false;
             StatusBarErrorMessage = "";
             StatusBarMessage = "";
 
-            foreach (var filePath in filepaths)
+            foreach (var filePath in paths)
             {
-                string fileName = HttpUtility.UrlDecode(System.IO.Path.GetFileName(filePath));//filePath.Name;//
+                string fileName = System.IO.Path.GetFileName(filePath);
                 string fileExt = System.IO.Path.GetExtension(fileName);
 
                 if ((fileExt.Equals(".mp4", StringComparison.OrdinalIgnoreCase)) || (fileExt.Equals(".mkv", StringComparison.OrdinalIgnoreCase)))// || (fileExt.ToLower() == ".avi"))
                 {
-                    VideoFilePath = HttpUtility.UrlDecode(filePath);//filePath;.Path.AbsolutePath;
+                    VideoFilePath = filePath;
                     VideoFileName = fileName;
                     AlbumArt = null;
                     DefaultTextForVideo = "";
 
-                    TagLib.File file = TagLib.File.Create(VideoFilePath);
+                    using TagLib.File file = TagLib.File.Create(VideoFilePath);
 
                     // Reads title
                     Title = file.Tag.Title;
@@ -272,12 +289,10 @@ public partial class MainWindowViewModel : ObservableObject
                         //DefaultDropImageForVideo = new Bitmap(assets?.Open(new Uri("avares://AddCoverToVideoFile/Assets/video2.png")));
                         DefaultDropImageForVideo = new Bitmap(AssetLoader.Open(new Uri("avares://AddCoverToVideoFile/Assets/video2.png")));
                     }
-
-                    file.Dispose();
                 }
                 else if ((fileExt.Equals(".jpg", StringComparison.OrdinalIgnoreCase)) || (fileExt.Equals(".jpeg", StringComparison.OrdinalIgnoreCase)) || (fileExt.Equals(".png", StringComparison.OrdinalIgnoreCase)))
                 {
-                    PictureFilePath = HttpUtility.UrlDecode(filePath);// filePath;//.Path.AbsolutePath;
+                    PictureFilePath = filePath;
                     PictureFileName = fileName; //filePath.Name;
                     DefaultTextForPicture = "";
                     DefaultDropImageForPicture = null;
@@ -318,26 +333,36 @@ public partial class MainWindowViewModel : ObservableObject
                 StatusBarMessage = "Drop a video.";
             }
         }
+        catch (Exception e)
+        {
+            StatusBarErrorMessage = string.Format("Error processing dropped file: {0}", e.Message);
+            StatusBarMessage = "Error";
+            IsButtonEnabled = !string.IsNullOrEmpty(VideoFilePath) && !string.IsNullOrEmpty(PictureFilePath);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     public async Task LoadCover(string path)
     {
         await using var imageStream = await LoadCoverBitmapAsync(path);
-        if (imageStream != null)
+        if (imageStream == null)
         {
-            NewAlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(imageStream, 400));
+            return;
         }
+
+        NewAlbumArt = await Task.Run(() => Bitmap.DecodeToWidth(imageStream, 400));
     }
 
     public static async Task<Stream?> LoadCoverBitmapAsync(string path)
     {
-        if (File.Exists(path))
-        {
-            return await Task.FromResult(File.OpenRead(path));
-        }
-        else
+        if (!File.Exists(path))
         {
             return null;
         }
+
+        return await Task.FromResult(File.OpenRead(path));
     }
 }
